@@ -11,6 +11,8 @@ admins = [
 ]
 
 ip = os.getenv("ip")
+PGUSER = str(os.getenv("PGUSER"))
+PGPASSWORD = str(os.getenv("PGPASSWORD"))
 
 aiogram_redis = {
     'host': ip,
@@ -20,3 +22,8 @@ redis = {
     'address': (ip, 6379),
     'encoding': 'utf8'
 }
+
+GROUP = str(os.getenv("GROUPID"))
+CHANNEL = str(os.getenv("CHANNELID"))
+
+INSTRUCTION_LINK = str(os.getenv("INSTRUCTION_LINK"))
