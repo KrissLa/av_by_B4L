@@ -27,19 +27,20 @@ services:
     depends_on:
       - database_av_by
 
-  redis_av_bot:
-    image: redis
+  redis:
+    image: redis:4.0.5-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
     networks:
       - av_by_net
     volumes:
-      - ./redisdata:/var/lib/redis/data
-    ports:
-      - 6379:6379
-
-
-
-
+      - redis-data:/data
 
 networks:
   av_by_net:
     driver: bridge
+
+volumes:
+  redis-data:
+
+

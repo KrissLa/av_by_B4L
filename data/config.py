@@ -18,11 +18,11 @@ PGUSER = str(os.getenv("PGUSER"))
 PGPASSWORD = str(os.getenv("PGPASSWORD"))
 
 aiogram_redis = {
-    'host': ip,
+    'host': 'redis',
 }
 
 redis = {
-    'address': (ip, 6379),
+    'address': ('redis', 6379),
     'encoding': 'utf8'
 }
 
