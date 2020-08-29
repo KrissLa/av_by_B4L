@@ -14,6 +14,7 @@ admins = [
 
 
 ip = os.getenv("ip")
+PGDATABASE = str(os.getenv("PGDATABASE"))
 PGUSER = str(os.getenv("PGUSER"))
 PGPASSWORD = str(os.getenv("PGPASSWORD"))
 

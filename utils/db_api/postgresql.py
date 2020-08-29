@@ -12,6 +12,7 @@ class Database:
         self.pool: asyncio.pool.Pool = loop.run_until_complete(
             asyncpg.create_pool(
                 user=config.PGUSER,
+                database=config.PGDATABASE,
                 password=config.PGPASSWORD,
                 host=config.ip
             )
