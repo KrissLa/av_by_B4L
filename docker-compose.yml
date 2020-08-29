@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  database_av_by:
+    container_name: database_av_by
+    image: sameersbn/postgresql:12-20200524
+    environment:
+      PG_PASSWORD: $PGPASSWORD
+    restart: always
+    ports:
+      - 5432:5432
+    networks:
+      - av_by_net
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+  tgbot_av_by:
+    container_name: bot
+    build:
+      context: .
+    command: python app.py
+    restart: always
+    networks:
+      - av_by_net
+    env_file:
+      - ".env"
+    depends_on:
+      - database_av_by
+
+  redis_av_bot:
+    image: redis
+    networks:
+      - av_by_net
+    volumes:
+      - ./redisdata:/var/lib/redis/data
+    ports:
+      - 6379:6379
+
+
+
+
+
+networks:
+  av_by_net:
+    driver: bridge

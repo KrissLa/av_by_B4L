@@ -11,3 +11,7 @@ class Notifications(StatesGroup):
     WaitNotificationStatus = State()
     NotificationsOn = State()
     ToFilter = State()
+
+class Reports(StatesGroup):
+    """Стейты для отчетов об ошибках"""
+    WaitReport = State()

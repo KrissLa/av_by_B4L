@@ -10,6 +10,9 @@ admins = [
     os.getenv("ADMIN_ID"),
 ]
 
+
+
+
 ip = os.getenv("ip")
 PGUSER = str(os.getenv("PGUSER"))
 PGPASSWORD = str(os.getenv("PGPASSWORD"))
@@ -27,3 +30,4 @@ GROUP = str(os.getenv("GROUPID"))
 CHANNEL = str(os.getenv("CHANNELID"))
 
 INSTRUCTION_LINK = str(os.getenv("INSTRUCTION_LINK"))
+SEARCH_LINK = str(os.getenv("SEARCH_LINK"))

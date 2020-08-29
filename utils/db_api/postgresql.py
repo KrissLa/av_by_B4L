@@ -1,7 +1,10 @@
 import asyncio
 import asyncpg
+from datetime import datetime
 
 from data import config
+
+now = datetime.now()
 
 
 class Database:
@@ -65,11 +68,18 @@ class Database:
         """Выбираем все id Пользователей"""
         all_users = await self.pool.fetch('SELECT user_id FROM av_users')
         all_users_id = [id['user_id'] for id in all_users]
+        print(all_users_id)
         return all_users_id
 
     async def select_all_user_id_with_status_1(self):
         """Выбираем все id Пользователей"""
         all_users = await self.pool.fetch('SELECT user_id FROM av_users WHERE status = true')
+        all_users_id = [id['user_id'] for id in all_users]
+        return all_users_id
+
+    async def select_all_user_id_with_status_0(self):
+        """Выбираем все id Пользователей"""
+        all_users = await self.pool.fetch('SELECT user_id FROM av_users WHERE status = false')
         all_users_id = [id['user_id'] for id in all_users]
         return all_users_id
 
@@ -100,11 +110,11 @@ class Database:
 
     async def get_last_ads_id_list(self, user_id):
         """Получаем список последних объявлений"""
-        ads_1 = await self.pool.fetchval( f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
-        ads_2 = await self.pool.fetchval( f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
-        ads_3 = await self.pool.fetchval( f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
-        ads_4 = await self.pool.fetchval( f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
-        ads_5 = await self.pool.fetchval( f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
+        ads_1 = await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
+        ads_2 = await self.pool.fetchval(f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
+        ads_3 = await self.pool.fetchval(f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
+        ads_4 = await self.pool.fetchval(f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
+        ads_5 = await self.pool.fetchval(f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
         last_ads_list = []
         last_ads_list.append(ads_1)
         last_ads_list.append(ads_2)
@@ -115,23 +125,23 @@ class Database:
 
     async def get_ads_id_1(self, user_id):
         """Получаем id первого объявления в списке"""
-        return await self.pool.fetchval( f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
+        return await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
 
     async def get_ads_id_2(self, user_id):
         """Получаем id второго объявления в списке"""
-        return await self.pool.fetchval( f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
+        return await self.pool.fetchval(f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
 
     async def get_ads_id_3(self, user_id):
         """Получаем id третьего объявления в списке"""
-        return await self.pool.fetchval( f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
+        return await self.pool.fetchval(f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
 
     async def get_ads_id_4(self, user_id):
         """Получаем id четвертого объявления в списке"""
-        return await self.pool.fetchval( f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
+        return await self.pool.fetchval(f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
 
     async def get_ads_id_5(self, user_id):
         """Получаем id пятого объявления в списке"""
-        return await self.pool.fetchval( f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
+        return await self.pool.fetchval(f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
 
     async def create_table_bug_reports(self):
         """Создаем таблицу с отчетами об ошибках"""
@@ -141,14 +151,15 @@ class Database:
         user_id INT NOT NULL,
         name VARCHAR(255),
         status_report BOOL,
-        report TEXT);
+        report TEXT,
+        date TIMESTAMP WITH TIME ZONE);
         """
         await self.pool.execute(sql)
 
-    async def add_report(self, user_id: int, name: str, status_report: bool, report: str):
+    async def add_report(self, user_id: int, name: str, status_report: bool, report: str, date=now):
         """Добавляем отчет об ошибке в бд"""
-        sql = "INSERT INTO bug_reports (user_id, name, status_report, report) VALUES ($1, $2, $3, $4)"
-        await self.pool.execute(sql, user_id, name, status_report, report)
+        sql = "INSERT INTO bug_reports (user_id, name, status_report, report, date) VALUES ($1, $2, $3, $4, $5)"
+        await self.pool.execute(sql, user_id, name, status_report, report, date)
 
     async def count_reports(self):
         """Достаем количество отчетов"""
@@ -166,6 +177,10 @@ class Database:
         """Выбираем все отчеты"""
         sql = 'SELECT * FROM bug_reports'
         return await self.pool.fetch(sql)
+
+    async def sellect_last_report_id(self):
+        """Достаем id последнего отчета"""
+        return await self.pool.fetchval(f'SELECT id FROM bug_reports ORDER BY id DESC LIMIT 1')
 
     async def select_all_reports_with_status(self, status_report):
         """Выбираем все отчеты"""

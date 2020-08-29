@@ -46,11 +46,23 @@ class AvBySearch:
                 break
             title = el.select('.listing-item-title > h4 > a')[0].text.strip()
             price = el.select('.listing-item-price > small')[0].text.strip()
+            city = el.select('.listing-item-other > .listing-item-location')[0].text.strip()
+            description = el.select('.listing-item-desc')[0].text.split(',')
+            for desc in description:
+                print(desc.strip())
+            # print(description)
             info_av = {
                 'id': id,
                 'title': title,
                 'price': price,
-                'link': link
+                'link': link,
+                'city': city,
+                'year': description[0].strip(),
+                'transmission': description[1].strip(),
+                'engine_capacity': description[2].strip(),
+                'engines_type': description[3].strip(),
+                'body_type': description[4].strip(),
+                'mileage': description[5].strip(),
             }
             new_ads_list.append(info_av)
         return new_ads_list
