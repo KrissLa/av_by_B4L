@@ -74,13 +74,20 @@ async def bot_start(message: types.Message):
         print(ch.status)
         if ch1.status == ch.status == 'member':
             try:
-                await db.add_user(user_id=message.from_user.id, name=message.from_user.full_name, status=False,
-                                  filter=None, ads_id_1=None, ads_id_2=None, ads_id_3=None, ads_id_4=None,
-                                  ads_id_5=None)
-                await message.answer(f'Привет, {message.from_user.full_name}! '
-                                     f'Если Вам нужна помощь, нажмите на клавиатуре кнопку Помощь/Инструкция или '
-                                     f'введите команду /help',
-                                     reply_markup=menu)
+                try:
+
+                    await db.add_user(user_id=message.from_user.id, name=message.from_user.full_name, status=False,
+                                      filter=None, ads_id_1=None, ads_id_2=None, ads_id_3=None, ads_id_4=None,
+                                      ads_id_5=None)
+                    await message.answer(f'Привет, {message.from_user.full_name}! '
+                                         f'Если Вам нужна помощь, нажмите на клавиатуре кнопку Помощь/Инструкция или '
+                                         f'введите команду /help',
+                                         reply_markup=menu)
+                except:
+                    await message.answer(f'Привет, {message.from_user.full_name}! '
+                                         f'Если Вам нужна помощь, нажмите на клавиатуре кнопку Помощь/Инструкция или '
+                                         f'введите команду /help',
+                                         reply_markup=menu)
             except:
                 print("Что-то пошло не так")
 
