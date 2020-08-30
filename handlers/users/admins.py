@@ -38,15 +38,22 @@ async def back_to_menu(message: types.Message, state: FSMContext):
     await state.finish()
 
 @dp.callback_query_handler(text='bot_was_restarted', user_id=admins, state=Admin.AdminMenu)
-async def bot_was_restarted(call:types.CallbackQuery):
+async def bot_was_restarted(call:types.CallbackQuery, state: FSMContext):
     """Отправка уведомления о перезагрузке бота"""
     users_list = await db.select_all_user_id_with_status_1()
+    users_list_0 = await db.select_all_user_id_with_status_0()
     for user in users_list:
         await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
                                                   'Приносим извинения за неудобства.',
                                reply_markup=ReplyKeyboardRemove())
         await bot.send_message(chat_id=user, text="Для возобновления рассылки, пожалуйста, нажмите кнопку.",
                                reply_markup=resume_notifications)
+    for user in users_list_0:
+        await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
+                                                  'Приносим извинения за неудобства.',
+                               reply_markup=menu)
+        state = dp.current_state()
+        await state.set_state()
     await call.answer('Сообщения отправлены')
 
 

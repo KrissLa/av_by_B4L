@@ -38,7 +38,10 @@ class AvBySearch:
         r = requests.get(params)
         html = BS(r.content, 'html.parser')
         new_ads_list = []
+        ads_count = 0
         for el in html.select('.listing-item '):
+            if ads_count > 23:
+                break
             link = el.select('.listing-item-title > h4 > a')[0]['href']
             id = int(link.split('/')[-1])
             if id in last_ads_list:
@@ -61,4 +64,5 @@ class AvBySearch:
                 'mileage': description[5].strip(),
             }
             new_ads_list.append(info_av)
+            ads_count += 1
         return new_ads_list

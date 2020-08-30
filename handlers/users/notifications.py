@@ -45,7 +45,7 @@ async def cancel_change_filter(call: CallbackQuery):
     print(f'Приступаю к поиску {user_id}')
     await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
 
-@dp.callback_query_handler(text='stop_noti', state=Notifications.NotificationsOn)
+@dp.callback_query_handler(text='stop_noti', state='*')
 async def cancel_change_filter(call: CallbackQuery, state: FSMContext):
     """Возобновление рассылки после перезагрузки бота"""
     await call.message.edit_reply_markup()
