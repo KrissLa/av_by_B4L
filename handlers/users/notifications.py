@@ -27,17 +27,22 @@ async def start_ads_from_filter(call:CallbackQuery):
     await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
 
 
-@dp.callback_query_handler(text='resume_noti', state=Notifications.NotificationsOn)
+@dp.callback_query_handler(text='resume_noti', state='*')
 async def cancel_change_filter(call: CallbackQuery):
     """Возобновление рассылки после перезагрузки бота"""
+    await Notifications.NotificationsOn.set()
     await call.message.edit_reply_markup()
     user_id = call.from_user.id
+    print(user_id)
     await db.change_status(user_id, True)
     await call.message.answer('Рассылка включена. Я отправлю Вам новые объявления как только они появятся.',
                               reply_markup=running_notification_menu)
     status = await db.get_status(user_id)
+    print(status)
     user_filter = await db.get_filter(user_id)
+    print(user_filter)
     av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
+    print(f'Приступаю к поиску {user_id}')
     await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
 
 @dp.callback_query_handler(text='stop_noti', state=Notifications.NotificationsOn)

@@ -68,11 +68,16 @@ async def get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_
     """Рассылка новых объявлений после перезагрузки"""
     try:
         while status:
+            print('жду секунды')
             await asyncio.sleep(time_interval)
+
             status = await db.get_status(user_id)
+            print(status)
             if not status:
+                print('брекнулся')
                 break
             ads_ids = []
+            print(ads_ids)
             last_ads = await db.get_last_ads_id_list(user_id)
             new_ads = av_by.new_ads(user_filter, int(last_ads[0]))
             if new_ads:
