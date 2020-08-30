@@ -122,6 +122,7 @@ async def bot_start(message: types.Message):
 @dp.callback_query_handler(text='check_subs')
 async def check_subscriptions(call: types.CallbackQuery):
     """Проверяем подписку"""
+    await call.message.edit_reply_markup()
     try:
         ch1 = await bot.get_chat_member(chat_id=GROUP, user_id=call.from_user.id)
         print(ch1.status)

@@ -6,7 +6,6 @@ def get_last_auto_from_av(params):
     """Получаем первоначальный список объявлений с av.by"""
     ids = []
     r = requests.get(params)
-    print(r)
     html = BS(r.content, 'html.parser')
     for el in html.select('.listing-item '):
         link = el.select('.listing-item-title > h4 > a')[0]['href']
@@ -48,9 +47,6 @@ class AvBySearch:
             price = el.select('.listing-item-price > small')[0].text.strip()
             city = el.select('.listing-item-other > .listing-item-location')[0].text.strip()
             description = el.select('.listing-item-desc')[0].text.split(',')
-            for desc in description:
-                print(desc.strip())
-            # print(description)
             info_av = {
                 'id': id,
                 'title': title,

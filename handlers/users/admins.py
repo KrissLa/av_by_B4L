@@ -1,13 +1,13 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ContentTypes
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ContentTypes, ReplyKeyboardRemove
 
 from data.config import admins
 from keyboards.default.menu_keyboards import menu, back_to_menu_menu, cancel_menu
 from keyboards.inline.callback_datas import report_data, feedback_data
 from keyboards.inline.inline_keyboards import admin_menu, set_message_type_keyboard, confirm_message_photo, \
-    set_recipients_markup
+    set_recipients_markup, resume_notifications
 from loader import dp, db, bot
 from states.admin_states import Admin
 
@@ -36,6 +36,18 @@ async def back_to_menu(message: types.Message, state: FSMContext):
     await message.answer('Вы нажали Главное меню',
                          reply_markup=menu)
     await state.finish()
+
+@dp.callback_query_handler(text='bot_was_restarted', user_id=admins, state=Admin.AdminMenu)
+async def bot_was_restarted(call:types.CallbackQuery):
+    """Отправка уведомления о перезагрузке бота"""
+    users_list = await db.select_all_user_id_with_status_1()
+    for user in users_list:
+        await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
+                                                  'Приносим извинения за неудобства.',
+                               reply_markup=ReplyKeyboardRemove())
+        await bot.send_message(chat_id=user, text="Для возобновления рассылки, пожалуйста, нажмите кнопку.",
+                               reply_markup=resume_notifications)
+    await call.answer('Сообщения отправлены')
 
 
 @dp.callback_query_handler(text='count_all_users', user_id=admins, state=Admin.AdminMenu)

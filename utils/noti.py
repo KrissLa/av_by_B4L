@@ -1,10 +1,16 @@
 import asyncio
 
+from data.config import admins
 
-async def get_ads(state_name, db, user_id, av_by, user_filter, bot, message, time_interval, state):
+
+async def get_ads(status, db, user_id, av_by, user_filter, bot, message, time_interval):
     """Рассылка новых объявлений"""
     try:
-        while state_name=='Notifications:NotificationsOn':
+        while status:
+            await asyncio.sleep(time_interval)
+            status = await db.get_status(user_id)
+            if not status:
+                break
             ads_ids = []
             last_ads = await db.get_last_ads_id_list(user_id)
             new_ads = av_by.new_ads(user_filter, int(last_ads[0]))
@@ -31,54 +37,41 @@ async def get_ads(state_name, db, user_id, av_by, user_filter, bot, message, tim
                     ads_ids.append(ads['id'])
 
                 if len(ads_ids) == 1:
-                    await db.change_ads_id_5(user_id, last_ads[3])
-                    await db.change_ads_id_4(user_id, last_ads[2])
-                    await db.change_ads_id_3(user_id, last_ads[1])
-                    await db.change_ads_id_2(user_id, last_ads[0])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=last_ads[0],
+                                         ads_id_3=last_ads[1], ads_id_4=last_ads[2], ads_id_5=last_ads[3])
                 elif len(ads_ids) == 2:
-                    await db.change_ads_id_5(user_id, last_ads[2])
-                    await db.change_ads_id_4(user_id, last_ads[1])
-                    await db.change_ads_id_3(user_id, last_ads[0])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=last_ads[0], ads_id_4=last_ads[1], ads_id_5=last_ads[2])
                 elif len(ads_ids) == 3:
-                    await db.change_ads_id_5(user_id, last_ads[1])
-                    await db.change_ads_id_4(user_id, last_ads[0])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=last_ads[0], ads_id_5=last_ads[1])
                 elif len(ads_ids) == 4:
-                    await db.change_ads_id_5(user_id, last_ads[0])
-                    await db.change_ads_id_4(user_id, ads_ids[-4])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=ads_ids[-4], ads_id_5=last_ads[0])
                 elif len(ads_ids) >= 5:
-                    await db.change_ads_id_5(user_id, ads_ids[-5])
-                    await db.change_ads_id_4(user_id, ads_ids[-4])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=ads_ids[-4], ads_id_5=ads_ids[-5])
             else:
                 print('Пока пусто, продолжаю следить')
-            await asyncio.sleep(time_interval)
-            state_name = await state.get_state()
-        await message.answer('Рассылка остановлена')
+            status = await db.get_status(user_id)
+        await message.answer(f'Рассылка остановлена. Возможно в течении 20 секунд Вам придет объявление, '
+                             f'которое уже находится в обработке')
 
 
 
     except:
-        await message.answer('Что-то сломалось. \n'
-                             'Попробуйте меня перезагрузить /restart и проверьте фильтр.\n'
-                             'Если не помогло, пожалуйста, сообщите об ошибке')
+        for user in admins:
+            await bot.send_message(chat_id=user, text=f'У пользователя {user_id} что-то сломалось с парсером. Проверь')
 
 
-
-async def get_ads_call(state_name, db, user_id, av_by, user_filter, bot, call, time_interval, state):
+async def get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval):
     """Рассылка новых объявлений после перезагрузки"""
     try:
-        while state_name == 'Notifications:NotificationsOn':
+        while status:
+            await asyncio.sleep(time_interval)
+            status = await db.get_status(user_id)
+            if not status:
+                break
             ads_ids = []
             last_ads = await db.get_last_ads_id_list(user_id)
             new_ads = av_by.new_ads(user_filter, int(last_ads[0]))
@@ -105,44 +98,29 @@ async def get_ads_call(state_name, db, user_id, av_by, user_filter, bot, call, t
                     ads_ids.append(ads['id'])
 
                 if len(ads_ids) == 1:
-                    await db.change_ads_id_5(user_id, last_ads[3])
-                    await db.change_ads_id_4(user_id, last_ads[2])
-                    await db.change_ads_id_3(user_id, last_ads[1])
-                    await db.change_ads_id_2(user_id, last_ads[0])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=last_ads[0],
+                                         ads_id_3=last_ads[1], ads_id_4=last_ads[2], ads_id_5=last_ads[3])
                 elif len(ads_ids) == 2:
-                    await db.change_ads_id_5(user_id, last_ads[2])
-                    await db.change_ads_id_4(user_id, last_ads[1])
-                    await db.change_ads_id_3(user_id, last_ads[0])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=last_ads[0], ads_id_4=last_ads[1], ads_id_5=last_ads[2])
                 elif len(ads_ids) == 3:
-                    await db.change_ads_id_5(user_id, last_ads[1])
-                    await db.change_ads_id_4(user_id, last_ads[0])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=last_ads[0], ads_id_5=last_ads[1])
                 elif len(ads_ids) == 4:
-                    await db.change_ads_id_5(user_id, last_ads[0])
-                    await db.change_ads_id_4(user_id, ads_ids[-4])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=ads_ids[-4], ads_id_5=last_ads[0])
                 elif len(ads_ids) >= 5:
-                    await db.change_ads_id_5(user_id, ads_ids[-5])
-                    await db.change_ads_id_4(user_id, ads_ids[-4])
-                    await db.change_ads_id_3(user_id, ads_ids[-3])
-                    await db.change_ads_id_2(user_id, ads_ids[-2])
-                    await db.change_ads_id_1(user_id, ads_ids[-1])
+                    await db.set_ads_ids(user_id=user_id, ads_id_1=ads_ids[-1], ads_id_2=ads_ids[-2],
+                                         ads_id_3=ads_ids[-3], ads_id_4=ads_ids[-4], ads_id_5=ads_ids[-5])
             else:
                 print('Пока пусто, продолжаю следить')
-            await asyncio.sleep(time_interval)
-            state_name = await state.get_state()
-        await call.message.answer('Рассылка остановлена')
+            status = await db.get_status(user_id)
+
+        await call.message.answer(f'Рассылка остановлена. Возможно в течении 20 секунд Вам придет объявление, '
+                                  f'которое уже находится в обработке')
 
 
 
     except:
-        await call.message.answer('Что-то сломалось. \n'
-                             'Попробуйте меня перезагрузить /restart и проверьте фильтр.\n'
-                             'Если не помогло, пожалуйста, сообщите об ошибке')
+        for user in admins:
+            await bot.send_message(chat_id=user, text=f'У пользователя {user_id} что-то сломалось с парсером. Проверь')

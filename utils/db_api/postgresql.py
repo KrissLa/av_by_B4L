@@ -65,6 +65,10 @@ class Database:
         """Устанавливаем status"""
         await self.pool.execute(f"UPDATE av_users SET status = {status_value} WHERE user_id = {user_id}")
 
+    async def get_status(self, user_id):
+        """Получаем статут рассылки"""
+        return await self.pool.fetchval(f'SELECT status FROM av_users WHERE user_id = {user_id}')
+
     async def select_all_user_id(self):
         """Выбираем все id Пользователей"""
         all_users = await self.pool.fetch('SELECT user_id FROM av_users')
@@ -84,65 +88,55 @@ class Database:
         all_users_id = [id['user_id'] for id in all_users]
         return all_users_id
 
-    async def change_ads_id_1(self, user_id, ads_id):
-        """Устанавливаем id первого объявления на странице"""
-        await self.pool.execute(f"UPDATE av_users SET ads_id_1 = {ads_id} WHERE user_id = {user_id}")
-
-    async def change_ads_id_2(self, user_id, ads_id):
-        """Устанавливаем id второго объявления на странице"""
-        await self.pool.execute(f"UPDATE av_users SET ads_id_2 = {ads_id} WHERE user_id = {user_id}")
-
-    async def change_ads_id_3(self, user_id, ads_id):
-        """Устанавливаем id третьего объявления на странице"""
-        await self.pool.execute(f"UPDATE av_users SET ads_id_3 = {ads_id} WHERE user_id = {user_id}")
-
-    async def change_ads_id_4(self, user_id, ads_id):
-        """Устанавливаем id четвертого объявления на странице"""
-        await self.pool.execute(f"UPDATE av_users SET ads_id_4 = {ads_id} WHERE user_id = {user_id}")
-
-    async def change_ads_id_5(self, user_id, ads_id):
-        """Устанавливаем id пятого объявления на странице"""
-        await self.pool.execute(f"UPDATE av_users SET ads_id_5 = {ads_id} WHERE user_id = {user_id}")
+    # async def change_ads_id_1(self, user_id, ads_id):
+    #     """Устанавливаем id первого объявления на странице"""
+    #     await self.pool.execute(f"UPDATE av_users SET ads_id_1 = {ads_id} WHERE user_id = {user_id}")
+    #
+    # async def change_ads_id_2(self, user_id, ads_id):
+    #     """Устанавливаем id второго объявления на странице"""
+    #     await self.pool.execute(f"UPDATE av_users SET ads_id_2 = {ads_id} WHERE user_id = {user_id}")
+    #
+    # async def change_ads_id_3(self, user_id, ads_id):
+    #     """Устанавливаем id третьего объявления на странице"""
+    #     await self.pool.execute(f"UPDATE av_users SET ads_id_3 = {ads_id} WHERE user_id = {user_id}")
+    #
+    # async def change_ads_id_4(self, user_id, ads_id):
+    #     """Устанавливаем id четвертого объявления на странице"""
+    #     await self.pool.execute(f"UPDATE av_users SET ads_id_4 = {ads_id} WHERE user_id = {user_id}")
+    #
+    # async def change_ads_id_5(self, user_id, ads_id):
+    #     """Устанавливаем id пятого объявления на странице"""
+    #     await self.pool.execute(f"UPDATE av_users SET ads_id_5 = {ads_id} WHERE user_id = {user_id}")
 
     async def set_ads_ids(self, user_id, ads_id_1, ads_id_2, ads_id_3, ads_id_4, ads_id_5):
-        """Устанавливаем id второго объявления на странице"""
+        """Устанавливаем id первых 5-и объявлений на странице"""
         await self.pool.execute(
             f"UPDATE av_users SET ads_id_1 = {ads_id_1}, ads_id_2 = {ads_id_2}, ads_id_3 = {ads_id_3}, ads_id_4 = {ads_id_4}, ads_id_5 = {ads_id_5} WHERE user_id = {user_id}")
 
     async def get_last_ads_id_list(self, user_id):
         """Получаем список последних объявлений"""
-        ads_1 = await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
-        ads_2 = await self.pool.fetchval(f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
-        ads_3 = await self.pool.fetchval(f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
-        ads_4 = await self.pool.fetchval(f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
-        ads_5 = await self.pool.fetchval(f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
-        last_ads_list = []
-        last_ads_list.append(ads_1)
-        last_ads_list.append(ads_2)
-        last_ads_list.append(ads_3)
-        last_ads_list.append(ads_4)
-        last_ads_list.append(ads_5)
-        return last_ads_list
+        ads_ids = await self.pool.fetchrow(f'SELECT ads_id_1, ads_id_2, ads_id_3, ads_id_4, ads_id_5 FROM av_users WHERE user_id = {user_id}')
+        return ads_ids
 
-    async def get_ads_id_1(self, user_id):
-        """Получаем id первого объявления в списке"""
-        return await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
-
-    async def get_ads_id_2(self, user_id):
-        """Получаем id второго объявления в списке"""
-        return await self.pool.fetchval(f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
-
-    async def get_ads_id_3(self, user_id):
-        """Получаем id третьего объявления в списке"""
-        return await self.pool.fetchval(f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
-
-    async def get_ads_id_4(self, user_id):
-        """Получаем id четвертого объявления в списке"""
-        return await self.pool.fetchval(f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
-
-    async def get_ads_id_5(self, user_id):
-        """Получаем id пятого объявления в списке"""
-        return await self.pool.fetchval(f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
+    # async def get_ads_id_1(self, user_id):
+    #     """Получаем id первого объявления в списке"""
+    #     return await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
+    #
+    # async def get_ads_id_2(self, user_id):
+    #     """Получаем id второго объявления в списке"""
+    #     return await self.pool.fetchval(f'SELECT ads_id_2 FROM av_users WHERE user_id = {user_id}')
+    #
+    # async def get_ads_id_3(self, user_id):
+    #     """Получаем id третьего объявления в списке"""
+    #     return await self.pool.fetchval(f'SELECT ads_id_3 FROM av_users WHERE user_id = {user_id}')
+    #
+    # async def get_ads_id_4(self, user_id):
+    #     """Получаем id четвертого объявления в списке"""
+    #     return await self.pool.fetchval(f'SELECT ads_id_4 FROM av_users WHERE user_id = {user_id}')
+    #
+    # async def get_ads_id_5(self, user_id):
+    #     """Получаем id пятого объявления в списке"""
+    #     return await self.pool.fetchval(f'SELECT ads_id_5 FROM av_users WHERE user_id = {user_id}')
 
     async def create_table_bug_reports(self):
         """Создаем таблицу с отчетами об ошибках"""
