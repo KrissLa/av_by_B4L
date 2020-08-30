@@ -14,7 +14,8 @@ class Database:
                 user=config.PGUSER,
                 database=config.PGDATABASE,
                 password=config.PGPASSWORD,
-                host=config.ip
+                host=config.ip,
+                port=config.PORT
             )
         )
 
