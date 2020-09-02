@@ -1,11 +1,20 @@
 import requests
 from bs4 import BeautifulSoup as BS
+import fake_useragent
+
+def get_user_agent():
+    user_agent = fake_useragent.UserAgent().random
+    header = {'user-agent': user_agent}
+    return header
+
+
 
 
 def get_last_auto_from_av(params):
     """Получаем первоначальный список объявлений с av.by"""
+
     ids = []
-    r = requests.get(params)
+    r = requests.get(params, headers=get_user_agent())
     html = BS(r.content, 'html.parser')
     for el in html.select('.listing-item '):
         link = el.select('.listing-item-title > h4 > a')[0]['href']
@@ -25,7 +34,7 @@ class AvBySearch:
 
     def new_ads(self, params, last_ads):
         """Проверяем изменился ли список объявлений"""
-        r = requests.get(params)
+        r = requests.get(params, headers=get_user_agent())
         html = BS(r.content, 'html.parser')
         link = html.select('.listing-item-title > h4 > a')[0]['href']
         id_ads = int(link.split('/')[-1])
@@ -35,7 +44,7 @@ class AvBySearch:
     # времени. Если нашлось новое объявление, переписываем файл.
     def get_new_ads_av(self, params, last_ads_list):
         """Получаем новые объявления"""
-        r = requests.get(params)
+        r = requests.get(params, headers=get_user_agent())
         html = BS(r.content, 'html.parser')
         new_ads_list = []
         ads_count = 0

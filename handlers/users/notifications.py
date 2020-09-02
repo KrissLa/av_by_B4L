@@ -21,10 +21,10 @@ async def start_ads_from_filter(call:CallbackQuery):
     await db.change_status(user_id, True)
     await call.message.answer('Рассылка включена. Я отправлю Вам новые объявления как только они появятся.',
                               reply_markup=running_notification_menu)
-    status = await db.get_status(user_id)
-    user_filter = await db.get_filter(user_id)
-    av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
-    await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
+    # status = await db.get_status(user_id)
+    # user_filter = await db.get_filter(user_id)
+    # av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
+    # await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
 
 
 @dp.callback_query_handler(text='resume_noti', state='*')
@@ -37,13 +37,13 @@ async def cancel_change_filter(call: CallbackQuery):
     await db.change_status(user_id, True)
     await call.message.answer('Рассылка включена. Я отправлю Вам новые объявления как только они появятся.',
                               reply_markup=running_notification_menu)
-    status = await db.get_status(user_id)
-    print(status)
-    user_filter = await db.get_filter(user_id)
-    print(user_filter)
-    av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
-    print(f'Приступаю к поиску {user_id}')
-    await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
+    # status = await db.get_status(user_id)
+    # print(status)
+    # user_filter = await db.get_filter(user_id)
+    # print(user_filter)
+    # av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
+    # print(f'Приступаю к поиску {user_id}')
+    # await get_ads_call(status, db, user_id, av_by, user_filter, bot, call, time_interval)
 
 @dp.callback_query_handler(text='stop_noti', state='*')
 async def cancel_change_filter(call: CallbackQuery, state: FSMContext):
@@ -65,18 +65,18 @@ async def start_notification(message: types.Message):
     await message.answer('Рассылка включена. Я отправлю Вам новые объявления как только они появятся.',
                          reply_markup=running_notification_menu)
 
-    status = await db.get_status(user_id)
-    user_filter = await db.get_filter(user_id)
-    av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
-    await get_ads(status, db, user_id, av_by, user_filter, bot, message, time_interval)
+    # status = await db.get_status(user_id)
+    # user_filter = await db.get_filter(user_id)
+    # av_by = AvBySearch(await db.get_last_ads_id_list(user_id), user_filter)
+    # await get_ads(status, db, user_id, av_by, user_filter, bot, message, time_interval)
 
 
 @dp.message_handler(Text(endswith='Остановить рассылку'), state=Notifications.NotificationsOn)
 async def stop_notification(message: types.Message):
     """Нажатие на кнопку Остановить рассылку"""
     await db.change_status(message.from_user.id, False)
-    await message.answer(f'Рассылка остановлена. Возможно в течении 20 секунд Вам придет объявление, '
-                         f'которое уже находится в обработке',
+    await message.answer(f'Рассылка остановлена. Возможно Вам придут объявления, '
+                         f'которые уже находится в обработке',
                          reply_markup=stopped_notification_menu)
     await Notifications.WaitNotificationStatus.set()
 

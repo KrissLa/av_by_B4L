@@ -54,6 +54,7 @@ class Database:
         """Достаем количество пользователей"""
         return await self.pool.fetchval('SELECT COUNT(*) FROM av_users WHERE status = true')
 
+
     async def change_filter(self, user_id, filter_value):
         """Устанавливаем фильтр"""
         await self.pool.execute(f"UPDATE av_users SET filter = '{filter_value}' WHERE user_id = {user_id}")
@@ -111,6 +112,8 @@ class Database:
 
     async def set_ads_ids(self, user_id, ads_id_1, ads_id_2, ads_id_3, ads_id_4, ads_id_5):
         """Устанавливаем id первых 5-и объявлений на странице"""
+        sql = f"UPDATE av_users SET ads_id_1 = {ads_id_1}, ads_id_2 = {ads_id_2}, ads_id_3 = {ads_id_3}, ads_id_4 = {ads_id_4}, ads_id_5 = {ads_id_5} WHERE user_id = {user_id}"
+        print(sql)
         await self.pool.execute(
             f"UPDATE av_users SET ads_id_1 = {ads_id_1}, ads_id_2 = {ads_id_2}, ads_id_3 = {ads_id_3}, ads_id_4 = {ads_id_4}, ads_id_5 = {ads_id_5} WHERE user_id = {user_id}")
 
