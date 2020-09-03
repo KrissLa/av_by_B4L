@@ -1,15 +1,16 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ContentTypes, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ContentTypes
 
-from data.config import admins
+from filters.user_filters import IsAdminMessage, IsAdminCallback
 from keyboards.default.menu_keyboards import menu, back_to_menu_menu, cancel_menu
 from keyboards.inline.callback_datas import report_data, feedback_data
 from keyboards.inline.inline_keyboards import admin_menu, set_message_type_keyboard, confirm_message_photo, \
-    set_recipients_markup, resume_notifications
+    set_recipients_markup
 from loader import dp, db, bot
 from states.admin_states import Admin
+from utils.send_menu import send_menu_message, send_menu_admin_message, send_menu_admin_callback
 
 
 @dp.message_handler(Text(endswith='Отмена'), state='*')
@@ -20,7 +21,7 @@ async def get_cancel(message: types.Message, state: FSMContext):
                          reply_markup=menu)
 
 
-@dp.message_handler(commands=['admin'], user_id=admins, state='*')
+@dp.message_handler(IsAdminMessage(), commands=['admin'], state='*')
 async def get_admin_panel(message: types.Message):
     """Вход в админ панель"""
     await message.answer('Просто отправляю меню',
@@ -33,45 +34,45 @@ async def get_admin_panel(message: types.Message):
 @dp.message_handler(Text(endswith='Главное меню'), state=Admin.AdminMenu)
 async def back_to_menu(message: types.Message, state: FSMContext):
     """Нажатие на кнопку Главное меню"""
-    await message.answer('Вы нажали Главное меню',
-                         reply_markup=menu)
+    await send_menu_message(message)
     await state.finish()
 
-@dp.callback_query_handler(text='bot_was_restarted', user_id=admins, state=Admin.AdminMenu)
-async def bot_was_restarted(call:types.CallbackQuery, state: FSMContext):
-    """Отправка уведомления о перезагрузке бота"""
-    users_list = await db.select_all_user_id_with_status_1()
-    users_list_0 = await db.select_all_user_id_with_status_0()
-    for user in users_list:
-        await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
-                                                  'Приносим извинения за неудобства.',
-                               reply_markup=ReplyKeyboardRemove())
-        await bot.send_message(chat_id=user, text="Для возобновления рассылки, пожалуйста, нажмите кнопку.",
-                               reply_markup=resume_notifications)
-    for user in users_list_0:
-        await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
-                                                  'Приносим извинения за неудобства.',
-                               reply_markup=menu)
-        state = dp.current_state()
-        await state.set_state()
-    await call.answer('Сообщения отправлены')
+
+# @dp.callback_query_handler(text='bot_was_restarted', user_id=admins, state=Admin.AdminMenu)
+# async def bot_was_restarted(call:types.CallbackQuery, state: FSMContext):
+#     """Отправка уведомления о перезагрузке бота"""
+#     users_list = await db.select_all_user_id_with_status_1()
+#     users_list_0 = await db.select_all_user_id_with_status_0()
+#     for user in users_list:
+#         await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
+#                                                   'Приносим извинения за неудобства.',
+#                                reply_markup=ReplyKeyboardRemove())
+#         await bot.send_message(chat_id=user, text="Для возобновления рассылки, пожалуйста, нажмите кнопку.",
+#                                reply_markup=resume_notifications)
+#     for user in users_list_0:
+#         await bot.send_message(chat_id=user, text='По техническим причинам бот был перезагружен. '
+#                                                   'Приносим извинения за неудобства.',
+#                                reply_markup=menu)
+#         state = dp.current_state()
+#         await state.set_state()
+#     await call.answer('Сообщения отправлены')
 
 
-@dp.callback_query_handler(text='count_all_users', user_id=admins, state=Admin.AdminMenu)
+@dp.callback_query_handler(text='count_all_users', state=Admin.AdminMenu)
 async def get_count_all_users(call: types.CallbackQuery):
     """Получение количества всех пользователей зарегистрированных в боте"""
     count_users = await db.count_users()
     await call.message.answer(f"Количество всех пользователей: {count_users}")
 
 
-@dp.callback_query_handler(text='count_users_with_status_1', user_id=admins, state=Admin.AdminMenu)
+@dp.callback_query_handler(text='count_users_with_status_1', state=Admin.AdminMenu)
 async def get_count_users_with_status_1(call: types.CallbackQuery):
     """Получение количества всех пользователей с включенной рассылкой"""
     count_users = await db.count_users_with_status_1()
     await call.message.answer(f"Количество пользователей, у которых включена рассылка: {count_users}")
 
 
-@dp.callback_query_handler(text='select_all_reports_with_status_0', user_id=admins, state=Admin.AdminMenu)
+@dp.callback_query_handler(text='select_all_reports_with_status_0', state=Admin.AdminMenu)
 async def get_reports_with_status_0(call: types.CallbackQuery):
     """Получение всех репортов"""
     all_reports = await db.select_all_reports_with_status(status_report=False)
@@ -96,7 +97,7 @@ async def get_reports_with_status_0(call: types.CallbackQuery):
                                                                     ]))
 
 
-@dp.callback_query_handler(report_data.filter(), user_id=admins, state='*')
+@dp.callback_query_handler(report_data.filter(), state='*')
 async def set_report_status_1(call: types.CallbackQuery, callback_data: dict):
     """Отметить отчет как испраленный"""
     report_id = callback_data.get('report_id')
@@ -122,7 +123,7 @@ async def set_report_status_1(call: types.CallbackQuery, callback_data: dict):
     await call.message.edit_reply_markup()
 
 
-@dp.callback_query_handler(feedback_data.filter(), user_id=admins, state='*')
+@dp.callback_query_handler(feedback_data.filter(), state='*')
 async def send_feedback_true(call: types.CallbackQuery, callback_data: dict):
     """Отправка сообщения пользователю об исправлении ошибки"""
     report_id = callback_data.get('report_id')
@@ -134,14 +135,14 @@ async def send_feedback_true(call: types.CallbackQuery, callback_data: dict):
     await call.message.edit_reply_markup()
 
 
-@dp.callback_query_handler(text='send_feedback_false', user_id=admins, state='*')
+@dp.callback_query_handler(text='send_feedback_false', state='*')
 async def send_feedback_false(call: types.CallbackQuery):
     """Не отправлять отчет пользователю"""
     await call.answer('ок')
     await call.message.edit_reply_markup()
 
 
-@dp.callback_query_handler(text='mailing', user_id=admins, state=Admin.AdminMenu)
+@dp.callback_query_handler(text='mailing', state=Admin.AdminMenu)
 async def mailing(call: types.CallbackQuery):
     """Раздел рассылки"""
     await call.message.answer('Отправляю кнопку отмены',
@@ -214,12 +215,12 @@ async def send_photo_to_all_users(call: types.CallbackQuery, state: FSMContext):
         count_messages += 1
         await bot.send_photo(chat_id=user, photo=photo_id,
                              caption=f'{caption}')
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
-@dp.callback_query_handler(state=Admin.MessagePhotoRecipients, text='send_message_to_users_with_status_1')
+@dp.callback_query_handler(state=Admin.MessagePhotoRecipients,
+                           text='send_message_to_users_with_status_1')
 async def send_photo_to_users_with_status_1(call: types.CallbackQuery, state: FSMContext):
     """Отправляем фотографию пользователям бота, у которых включена рассылка"""
     await call.message.edit_reply_markup()
@@ -232,12 +233,12 @@ async def send_photo_to_users_with_status_1(call: types.CallbackQuery, state: FS
         count_messages += 1
         await bot.send_photo(chat_id=user, photo=photo_id,
                              caption=f'{caption}')
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
-@dp.callback_query_handler(state=Admin.MessagePhotoRecipients, text='send_message_to_users_with_status_0')
+@dp.callback_query_handler(state=Admin.MessagePhotoRecipients,
+                           text='send_message_to_users_with_status_0')
 async def send_photo_to_users_with_status_1(call: types.CallbackQuery, state: FSMContext):
     """Отправляем фотографию пользователям бота, у которых включена рассылка"""
     await call.message.edit_reply_markup()
@@ -250,8 +251,7 @@ async def send_photo_to_users_with_status_1(call: types.CallbackQuery, state: FS
         count_messages += 1
         await bot.send_photo(chat_id=user, photo=photo_id,
                              caption=f'{caption}')
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
@@ -278,11 +278,8 @@ async def get_recipients_ids(message: types.Message, state: FSMContext):
             count_messages += 1
         except:
             pass
-    await message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_message(message, count_messages)
     await state.finish()
-
-
 
 
 @dp.callback_query_handler(text='message_type_text', state=Admin.AdminMessageType)
@@ -312,15 +309,14 @@ async def send_message_text_to_all_users(call: types.CallbackQuery, state: FSMCo
     message_text = data.get('message_text')
     count_messages = 0
     for user in users:
-
         await bot.send_message(chat_id=user, text=message_text, disable_web_page_preview=True)
         count_messages += 1
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
-@dp.callback_query_handler(state=Admin.MessageTextRecipients, text='send_message_to_users_with_status_1')
+@dp.callback_query_handler(state=Admin.MessageTextRecipients,
+                           text='send_message_to_users_with_status_1')
 async def send_message_text_to_users_with_status_1(call: types.CallbackQuery, state: FSMContext):
     """Отправляем сообщение пользователям бота, у которых включена рассылка"""
     await call.message.edit_reply_markup()
@@ -331,12 +327,12 @@ async def send_message_text_to_users_with_status_1(call: types.CallbackQuery, st
     for user in users:
         await bot.send_message(chat_id=user, text=message_text, disable_web_page_preview=True)
         count_messages += 1
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
-@dp.callback_query_handler(state=Admin.MessageTextRecipients, text='send_message_to_users_with_status_0')
+@dp.callback_query_handler(state=Admin.MessageTextRecipients,
+                           text='send_message_to_users_with_status_0')
 async def send_message_text_to_users_with_status_1(call: types.CallbackQuery, state: FSMContext):
     """Отправляем сообщение пользователям бота, у которых включена рассылка"""
     await call.message.edit_reply_markup()
@@ -347,8 +343,7 @@ async def send_message_text_to_users_with_status_1(call: types.CallbackQuery, st
     for user in users:
         await bot.send_message(chat_id=user, text=message_text, disable_web_page_preview=True)
         count_messages += 1
-    await call.message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_callback(call, count_messages)
     await state.finish()
 
 
@@ -373,13 +368,8 @@ async def get_recipients_ids(message: types.Message, state: FSMContext):
             count_messages += 1
         except:
             pass
-    await message.answer(f'Сообщение отправлено.\n Количество пользователей = {count_messages}',
-                              reply_markup=menu)
+    await send_menu_admin_message(message, count_messages)
     await state.finish()
-
-
-
-
 
 # @dp.callback_query_handler(text='message_type_photo', state=Admin.AdminMessageType)
 # async def

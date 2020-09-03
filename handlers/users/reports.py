@@ -7,19 +7,21 @@ from keyboards.default.menu_keyboards import menu
 from keyboards.inline.callback_datas import report_data
 from loader import dp, db, bot
 from states.menu_states import Reports
+from utils.send_menu import send_menu_after_report, send_menu_callback
 
 
 @dp.callback_query_handler(text='cancel_filter_change', state=Reports.WaitReport)
 async def cancel_report(call: types.CallbackQuery, state: FSMContext):
     """Отмена отправки репорта"""
-    await call.message.answer("Отмена", reply_markup=menu)
+    await call.answer("Отмена")
     await call.message.edit_reply_markup()
+    await send_menu_callback(call)
     await state.finish()
 
 
 @dp.message_handler(state=Reports.WaitReport)
-async def get_cancel(message: types.Message, state: FSMContext):
-    """Нажатие на кнопку Главное меню"""
+async def send_report(message: types.Message, state: FSMContext):
+    """Отправка отчета об ошибке"""
     report = message.text
     await db.add_report(user_id=message.from_user.id, name=message.from_user.full_name, status_report=False,
                         report=report)
@@ -37,8 +39,5 @@ async def get_cancel(message: types.Message, state: FSMContext):
                                                                          )
                                                                      ]
                                                                  ]))
-    await message.answer('Спасибо за Ваше сообщение!\n'
-                         f'Номер Вашего отчета: {report_id}\n'
-                         'Мы исправим ошибку в ближайшее время',
-                         reply_markup=menu)
+    await send_menu_after_report(message, report_id)
     await state.finish()

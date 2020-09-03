@@ -88,14 +88,7 @@ admin_menu = InlineKeyboardMarkup(row_width=2,
                                               text='Рассылка / Сообщение',
                                               callback_data='mailing'
                                           )
-                                      ],
-                                      [
-                                          InlineKeyboardButton(
-                                              text='Отправить уведомления о перезагрузке бота',
-                                              callback_data='bot_was_restarted'
-                                          )
                                       ]
-
                                   ])
 
 set_message_type_keyboard = InlineKeyboardMarkup(row_width=2,

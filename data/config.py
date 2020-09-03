@@ -7,7 +7,7 @@ load_dotenv()
 BOT_TOKEN = str(os.getenv("BOT_TOKEN"))
 
 admins = [
-    os.getenv("ADMIN_ID"),
+    int(os.getenv("ADMIN_ID")),
 ]
 
 
