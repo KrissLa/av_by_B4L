@@ -23,7 +23,7 @@ async def cancel_change_filter(call: CallbackQuery):
                               f'Сейчас у вас не установлен фильтр\n\n',
                               reply_markup=back_to_menu_menu,
                               disable_web_page_preview=True)
-    await call.message.answer(f'Подробная инструкция здесь: <a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>',
+    await call.message.answer(f'Подробная инструкция здесь: Ссылка будет добавлена позже ', #<a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>
                               reply_markup=cancel_markup,
                               disable_web_page_preview=True)
     await NewFilters.WaitFilter.set()
@@ -62,7 +62,7 @@ async def get_settings_filters(message: types.Message):
                          f'Сейчас у вас {str_filter}\n\n',
                          reply_markup=back_to_menu_menu,
                          disable_web_page_preview=True)
-    await message.answer(f'Подробная инструкция здесь: <a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>',
+    await message.answer(f'Подробная инструкция здесь: Ссылка будет добавлена позже',   #<a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>
                          reply_markup=cancel_markup,
                          disable_web_page_preview=True)
     await NewFilters.WaitFilter.set()
@@ -90,8 +90,8 @@ async def get_help_or_instruction(message: types.Message):
     await message.answer(f'3. Нажмите кнопку "Включить рассылку"')
     await bot.send_photo(chat_id=user_id,
                          photo='https://sun9-51.userapi.com/s0SF6FdEDVl5kJioXYx_R6AjzI3X9u7HOqr7OA/zgP86Jdkwnw.jpg')
-    await message.answer(f'Подробная инструкция здесь: <a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>',
-                         disable_web_page_preview=True)
+    # await message.answer(f'Подробная инструкция здесь: <a href="{INSTRUCTION_LINK}">ИНСТРУКЦИЯ</a>',
+    #                      disable_web_page_preview=True)
 
 
 @dp.message_handler(IsMemberMessage(), Text(endswith='О нас'))
