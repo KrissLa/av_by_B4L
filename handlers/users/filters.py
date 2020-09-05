@@ -19,7 +19,6 @@ async def cancel_change_filter(call: CallbackQuery, state: FSMContext):
     await state.finish()
 
 
-
 @dp.message_handler(Text(endswith='Главное меню'), state=NewFilters.WaitFilter)
 async def get_cancel(message: types.Message, state: FSMContext):
     """Нажатие на кнопку Главное меню"""
@@ -31,18 +30,72 @@ async def get_cancel(message: types.Message, state: FSMContext):
 async def set_filter(message: types.Message, state: FSMContext):
     """Получаем ссылку"""
     link = message.text
-    print(len(link))
+    #print(len(link))
     try:
         last_auto_list = get_last_auto_from_av(link)
-        print("Пробую")
-        print(last_auto_list)
-        await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
-        print("Готово")
-        await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0], ads_id_2=last_auto_list[1],
-                             ads_id_3=last_auto_list[2],
-                             ads_id_4=last_auto_list[3], ads_id_5=last_auto_list[4])
-        await send_menu_message(message)
-        await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
-        await state.finish()
+        #print("Пробую")
+        #print(last_auto_list)
+
+        #print("Готово")
+        try:
+            await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0], ads_id_2=last_auto_list[1],
+                                 ads_id_3=last_auto_list[2],
+                                 ads_id_4=last_auto_list[3], ads_id_5=last_auto_list[4])
+            await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+            await send_menu_message(message)
+            await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
+            await state.finish()
+        except:
+            try:
+                await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0],
+                                     ads_id_2=last_auto_list[1],
+                                     ads_id_3=last_auto_list[2],
+                                     ads_id_4=last_auto_list[3], ads_id_5=1)
+                await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+                await send_menu_message(message)
+                await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
+                await state.finish()
+            except:
+                try:
+                    await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0],
+                                         ads_id_2=last_auto_list[1],
+                                         ads_id_3=last_auto_list[2],
+                                         ads_id_4=1, ads_id_5=1)
+                    await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+                    await send_menu_message(message)
+                    await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
+                    await state.finish()
+                except:
+                    try:
+                        await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0],
+                                             ads_id_2=last_auto_list[1],
+                                             ads_id_3=1,
+                                             ads_id_4=1, ads_id_5=1)
+                        await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+                        await send_menu_message(message)
+                        await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
+                        await state.finish()
+                    except:
+                        try:
+                            await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=last_auto_list[0],
+                                                 ads_id_2=1,
+                                                 ads_id_3=1,
+                                                 ads_id_4=1, ads_id_5=1)
+                            await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+                            await send_menu_message(message)
+                            await message.answer(f"Фильтр установлен!", reply_markup=start_ads_from_filters)
+                            await state.finish()
+                        except:
+                            await db.set_ads_ids(user_id=message.from_user.id, ads_id_1=1,
+                                                 ads_id_2=1,
+                                                 ads_id_3=1,
+                                                 ads_id_4=1, ads_id_5=1)
+                            await db.change_filter(user_id=message.from_user.id, filter_value=str(link))
+                            await send_menu_message(message)
+                            await message.answer(f"Фильтр установлен! Но по Вашему фильтру на сайте не найдено ни "
+                                                 f"одного объявления. Если это не так, пожалуйста, измените фильтр "
+                                                 f"или сообщите об ошибке, если Вы отправили правильную ссылку",
+                                                 reply_markup=start_ads_from_filters)
+                            await state.finish()
     except:
         await message.answer(f'С Вашей ссылкой что-то не так. Пожалуйста проверьте все еще раз и повторите попытку')

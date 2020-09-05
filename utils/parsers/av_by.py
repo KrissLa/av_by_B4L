@@ -22,7 +22,7 @@ def get_last_auto_from_av(params):
         ids.append(id)
         if len(ids) >= 5:
             break
-    print(ids)
+    #print(ids)
     return ids
 
 
@@ -35,10 +35,13 @@ class AvBySearch:
     def new_ads(self, params, last_ads):
         """Проверяем изменился ли список объявлений"""
         r = requests.get(params, headers=get_user_agent())
-        print(r)
+        #print(r)
         html = BS(r.content, 'html.parser')
-        link = html.select('.listing-item-title > h4 > a')[0]['href']
-        id_ads = int(link.split('/')[-1])
+        try:
+            link = html.select('.listing-item-title > h4 > a')[0]['href']
+            id_ads = int(link.split('/')[-1])
+        except:
+            return False
         return int(id_ads) != int(last_ads)
 
     # Сравниваем объявления в файле с объявлениями на сайте до первого совпадения. Повторяем через равные промежутки
@@ -60,7 +63,7 @@ class AvBySearch:
             price = el.select('.listing-item-price > small')[0].text.strip()
             city = el.select('.listing-item-other > .listing-item-location')[0].text.strip()
             description = el.select('.listing-item-desc')[0].text.split(',')
-            print(description)
+            #print(description)
             try:
                 info_av = {
                     'id': id,

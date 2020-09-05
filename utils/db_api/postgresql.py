@@ -108,6 +108,11 @@ class Database:
         ads_ids = await self.pool.fetchrow(f'SELECT ads_id_1, ads_id_2, ads_id_3, ads_id_4, ads_id_5 FROM av_users WHERE user_id = {user_id}')
         return ads_ids
 
+    async def get_user_datas_where_status_1(self):
+        """Получаем список последних объявлений"""
+        user_datas = await self.pool.fetch(f'SELECT user_id, filter, ads_id_1, ads_id_2, ads_id_3, ads_id_4, ads_id_5 FROM av_users WHERE status = TRUE ORDER BY id')
+        return user_datas
+
     # async def get_ads_id_1(self, user_id):
     #     """Получаем id первого объявления в списке"""
     #     return await self.pool.fetchval(f'SELECT ads_id_1 FROM av_users WHERE user_id = {user_id}')
