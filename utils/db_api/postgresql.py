@@ -15,7 +15,8 @@ class Database:
                 database=config.PGDATABASE,
                 password=config.PGPASSWORD,
                 host=config.ip,
-                port=config.PORT
+                port=config.PORT,
+                statement_cache_size=0
             )
         )
 
@@ -62,6 +63,7 @@ class Database:
     async def reset_filter(self, user_id):
         """Сбрасываем фильтр"""
         await self.pool.execute(f"UPDATE av_users SET filter = NULL WHERE user_id = {user_id}")
+
 
     async def get_filter(self, user_id):
         """Получаем фильтр"""

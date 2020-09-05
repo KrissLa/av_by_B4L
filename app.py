@@ -1,7 +1,9 @@
 import asyncio
 import multiprocessing
 
+import aiogram
 from aiogram import executor
+from aiogram.utils.exceptions import BotBlocked
 
 import filters
 import middlewares
@@ -20,19 +22,21 @@ async def get_data():
         ids = await db.get_last_ads_id_list(user)
         user_filter = await db.get_filter(user)
         user_list = [int(ids[0]), int(ids[1]), int(ids[2]), int(ids[3]), int(ids[4])]
-        #print(user_list)
+        # print(user_list)
         user_data = {
             'user_id': user,
             'filter': user_filter,
             'ads_id_1': ids[0],
             'last_ads_list': user_list
         }
+        # print(user_data)
         user_datas.append(user_data)
     return user_datas
 
 
 def handler(user_data):
     av = AvBySearch(user_data['last_ads_list'], user_data['filter'])
+    print('создал класс парсерв')
     if av.new_ads(user_data['filter'], user_data['ads_id_1']):
         new_ads_list = av.get_new_ads_av(user_data['filter'], user_data['last_ads_list'])
         # print(result)
@@ -41,27 +45,32 @@ def handler(user_data):
         #     await bot.send_message(chat_id=user_data['user_id'], text=f'{res["title"]}')
     else:
         new_ads_list = []
+
         # print('Пока пусто')
     result = {
         'user_id': user_data['user_id'],
         'new_ads_list': new_ads_list,
         'last_ads': user_data['last_ads_list']
     }
-    #print(result)
+    # print(result)
+    # print(result)
 
     return result
 
 
 async def get_results():
     while True:
-        await asyncio.sleep(10)
+        # await asyncio.sleep(10)
         try:
             data = await get_data()
-            #print(data)
+            # print(data)
+            # print(data)
             with multiprocessing.Pool(multiprocessing.cpu_count()) as process:
                 parser_result = process.map(handler, data)
                 print(parser_result)
+                print('multi сделаль')
                 for user in parser_result:
+                    print('вошел в цикл')
                     if user['new_ads_list']:
                         print(user['user_id'])
                         user['new_ads_list'].reverse()
@@ -84,7 +93,8 @@ async def get_results():
                                          f'<a href="{ads["link"]}">Смотреть объявление на сайте</a>\n\n',
                                     disable_web_page_preview=False
                                 )
-                            except:
+                            except BotBlocked:
+                                await db.change_status(user_id=user['user_id'], status_value=False)
                                 print(f'Не удалось отправить сообщение пользователю {user["user_id"]}')
                             print(f'Отправил сообщение пользователю {user["user_id"]}')
                         print('Пытаюсь добавить id в бд')
@@ -130,7 +140,7 @@ async def get_results():
                     else:
                         print('Новых объявлений нет')
         except:
-            pass
+            print('Error')
 
             # print(res_mult)
             # print(len(res_mult))

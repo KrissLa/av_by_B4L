@@ -35,6 +35,7 @@ class AvBySearch:
     def new_ads(self, params, last_ads):
         """Проверяем изменился ли список объявлений"""
         r = requests.get(params, headers=get_user_agent())
+        print(r)
         html = BS(r.content, 'html.parser')
         link = html.select('.listing-item-title > h4 > a')[0]['href']
         id_ads = int(link.split('/')[-1])
@@ -59,19 +60,35 @@ class AvBySearch:
             price = el.select('.listing-item-price > small')[0].text.strip()
             city = el.select('.listing-item-other > .listing-item-location')[0].text.strip()
             description = el.select('.listing-item-desc')[0].text.split(',')
-            info_av = {
-                'id': id,
-                'title': title,
-                'price': price,
-                'link': link,
-                'city': city,
-                'year': description[0].strip(),
-                'transmission': description[1].strip(),
-                'engine_capacity': description[2].strip(),
-                'engines_type': description[3].strip(),
-                'body_type': description[4].strip(),
-                'mileage': description[5].strip(),
-            }
+            print(description)
+            try:
+                info_av = {
+                    'id': id,
+                    'title': title,
+                    'price': price,
+                    'link': link,
+                    'city': city,
+                    'year': description[0].strip(),
+                    'transmission': description[1].strip(),
+                    'engine_capacity': description[2].strip(),
+                    'engines_type': description[3].strip(),
+                    'body_type': description[4].strip(),
+                    'mileage': description[5].strip(),
+                }
+            except:
+                info_av = {
+                    'id': id,
+                    'title': title,
+                    'price': price,
+                    'link': link,
+                    'city': city,
+                    'year': '',
+                    'transmission': '',
+                    'engine_capacity': '',
+                    'engines_type': '',
+                    'body_type': '',
+                    'mileage': '',
+                }
             new_ads_list.append(info_av)
             ads_count += 1
         return new_ads_list
