@@ -95,90 +95,90 @@ def handler(user_data):
 async def get_results():
     while True:
         await asyncio.sleep(15)
-        # try:
-        data = await get_data()
-        # for da in data:
-        #
-        #     print(da)
-        # print('В циклу')
-        # print(data)
-        with multiprocessing.Pool(multiprocessing.cpu_count()) as process:
-            print('В мульти')
-            parser_result = process.map(handler, data)
-            # print(parser_result)
-            print('multi сделаль')
-            for user in parser_result:
-                # print('вошел в цикл')
-                if user['new_ads_list']:
-                    # print(user['user_id'])
-                    user['new_ads_list'].reverse()
-                    # print('перевернул списсок')
-                    for ads in user['new_ads_list']:
-                        # print('Вошел в цикл отправки сообщений')
-                        try:
-                            await bot.send_message(
-                                user['user_id'],
-                                text=f'Новое объявление по Вашему фильтру:\n\n'
-                                     f'{ads["title"]}\n\n'
-                                     f'Цена:  {ads["price"]}$\n'
-                                     f'Город:  {ads["city"]}\n'
-                                     f'Год:  {ads["year"]}\n'
-                                     f'Коробра передач:  {ads["transmission"]}\n'
-                                     f'Объём двигателя:  {ads["engine_capacity"]}\n'
-                                     f'Тип двигателя:  {ads["engines_type"]}\n'
-                                     f'Тип кузова:  {ads["body_type"]}\n'
-                                     f'Пробег:  {ads["mileage"]}\n\n'
-                                     f'<a href="{ads["link"]}">Смотреть объявление на сайте</a>\n\n',
-                                disable_web_page_preview=False
-                            )
-                        except BotBlocked:
-                            await db.change_status(user_id=user['user_id'], status_value=False)
-                            print(f'Не удалось отправить сообщение пользователю {user["user_id"]}')
-                        print(f'Отправил сообщение пользователю {user["user_id"]}')
-                    # print('Пытаюсь добавить id в бд')
+        try:
+            data = await get_data()
+            # for da in data:
+            #
+            #     print(da)
+            # print('В циклу')
+            # print(data)
+            with multiprocessing.Pool(multiprocessing.cpu_count()) as process:
+                print('В мульти')
+                parser_result = process.map(handler, data)
+                # print(parser_result)
+                print('multi сделаль')
+                for user in parser_result:
+                    # print('вошел в цикл')
+                    if user['new_ads_list']:
+                        # print(user['user_id'])
+                        user['new_ads_list'].reverse()
+                        # print('перевернул списсок')
+                        for ads in user['new_ads_list']:
+                            # print('Вошел в цикл отправки сообщений')
+                            try:
+                                await bot.send_message(
+                                    user['user_id'],
+                                    text=f'Новое объявление по Вашему фильтру:\n\n'
+                                         f'{ads["title"]}\n\n'
+                                         f'Цена:  {ads["price"]}$\n'
+                                         f'Город:  {ads["city"]}\n'
+                                         f'Год:  {ads["year"]}\n'
+                                         f'Коробра передач:  {ads["transmission"]}\n'
+                                         f'Объём двигателя:  {ads["engine_capacity"]}\n'
+                                         f'Тип двигателя:  {ads["engines_type"]}\n'
+                                         f'Тип кузова:  {ads["body_type"]}\n'
+                                         f'Пробег:  {ads["mileage"]}\n\n'
+                                         f'<a href="{ads["link"]}">Смотреть объявление на сайте</a>\n\n',
+                                    disable_web_page_preview=False
+                                )
+                            except BotBlocked:
+                                await db.change_status(user_id=user['user_id'], status_value=False)
+                                print(f'Не удалось отправить сообщение пользователю {user["user_id"]}')
+                            print(f'Отправил сообщение пользователю {user["user_id"]}')
+                        # print('Пытаюсь добавить id в бд')
 
-                    if len(user['new_ads_list']) == 1:
-                        await db.set_ads_ids(user_id=user['user_id'],
-                                             ads_id_1=user['new_ads_list'][-1]['id'],
-                                             ads_id_2=user['last_ads'][0],
-                                             ads_id_3=user['last_ads'][1],
-                                             ads_id_4=user['last_ads'][2],
-                                             ads_id_5=user['last_ads'][3])
-                    elif len(user['new_ads_list']) == 2:
-                        await db.set_ads_ids(user_id=user['user_id'],
-                                             ads_id_1=user['new_ads_list'][-1]['id'],
-                                             ads_id_2=user['new_ads_list'][-2]['id'],
-                                             ads_id_3=user['last_ads'][0],
-                                             ads_id_4=user['last_ads'][1],
-                                             ads_id_5=user['last_ads'][2])
-                    elif len(user['new_ads_list']) == 3:
-                        await db.set_ads_ids(user_id=user['user_id'],
-                                             ads_id_1=user['new_ads_list'][-1]['id'],
-                                             ads_id_2=user['new_ads_list'][-2]['id'],
-                                             ads_id_3=user['new_ads_list'][-3]['id'],
-                                             ads_id_4=user['last_ads'][0],
-                                             ads_id_5=user['last_ads'][1])
-                    elif len(user['new_ads_list']) == 4:
-                        await db.set_ads_ids(user_id=user['user_id'],
-                                             ads_id_1=user['new_ads_list'][-1]['id'],
-                                             ads_id_2=user['new_ads_list'][-2]['id'],
-                                             ads_id_3=user['new_ads_list'][-3]['id'],
-                                             ads_id_4=user['new_ads_list'][-4]['id'],
-                                             ads_id_5=user['last_ads'][0])
-                    elif len(user['new_ads_list']) >= 5:
-                        await db.set_ads_ids(user_id=user['user_id'],
-                                             ads_id_1=user['new_ads_list'][-1]['id'],
-                                             ads_id_2=user['new_ads_list'][-2]['id'],
-                                             ads_id_3=user['new_ads_list'][-3]['id'],
-                                             ads_id_4=user['new_ads_list'][-4]['id'],
-                                             ads_id_5=user['new_ads_list'][-5]['id'])
-                    print('закончил')
-                    # print(user['user_id'])
-                    # print(user['new_ads_list'])
-                # else:
-                # print('Новых объявлений нет')
-    # except:
-    #     print('Error')
+                        if len(user['new_ads_list']) == 1:
+                            await db.set_ads_ids(user_id=user['user_id'],
+                                                 ads_id_1=user['new_ads_list'][-1]['id'],
+                                                 ads_id_2=user['last_ads'][0],
+                                                 ads_id_3=user['last_ads'][1],
+                                                 ads_id_4=user['last_ads'][2],
+                                                 ads_id_5=user['last_ads'][3])
+                        elif len(user['new_ads_list']) == 2:
+                            await db.set_ads_ids(user_id=user['user_id'],
+                                                 ads_id_1=user['new_ads_list'][-1]['id'],
+                                                 ads_id_2=user['new_ads_list'][-2]['id'],
+                                                 ads_id_3=user['last_ads'][0],
+                                                 ads_id_4=user['last_ads'][1],
+                                                 ads_id_5=user['last_ads'][2])
+                        elif len(user['new_ads_list']) == 3:
+                            await db.set_ads_ids(user_id=user['user_id'],
+                                                 ads_id_1=user['new_ads_list'][-1]['id'],
+                                                 ads_id_2=user['new_ads_list'][-2]['id'],
+                                                 ads_id_3=user['new_ads_list'][-3]['id'],
+                                                 ads_id_4=user['last_ads'][0],
+                                                 ads_id_5=user['last_ads'][1])
+                        elif len(user['new_ads_list']) == 4:
+                            await db.set_ads_ids(user_id=user['user_id'],
+                                                 ads_id_1=user['new_ads_list'][-1]['id'],
+                                                 ads_id_2=user['new_ads_list'][-2]['id'],
+                                                 ads_id_3=user['new_ads_list'][-3]['id'],
+                                                 ads_id_4=user['new_ads_list'][-4]['id'],
+                                                 ads_id_5=user['last_ads'][0])
+                        elif len(user['new_ads_list']) >= 5:
+                            await db.set_ads_ids(user_id=user['user_id'],
+                                                 ads_id_1=user['new_ads_list'][-1]['id'],
+                                                 ads_id_2=user['new_ads_list'][-2]['id'],
+                                                 ads_id_3=user['new_ads_list'][-3]['id'],
+                                                 ads_id_4=user['new_ads_list'][-4]['id'],
+                                                 ads_id_5=user['new_ads_list'][-5]['id'])
+                        print('закончил')
+                        # print(user['user_id'])
+                        # print(user['new_ads_list'])
+                    # else:
+                    # print('Новых объявлений нет')
+        except:
+            print('Error')
     #     print(logging.info)
 
     # print(res_mult)
